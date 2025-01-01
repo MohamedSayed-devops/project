@@ -1,0 +1,44 @@
+name: CI/CD Pipeline
+
+# Trigger the workflow on push to the 'main' branch
+on:
+  push:
+    branches:
+      - main
+
+# Define jobs in the workflow
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the code from the repository
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    # Step 2: Set up Node.js environment
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16
+
+    # Step 3: Install dependencies
+    - name: Install dependencies
+      run: npm install
+
+    # Step 4: Run tests
+    - name: Run Tests
+      run: npm test
+
+    # Step 5: Build the project
+    - name: Build Project
+      run: npm run build
+
+    # Step 6: Deploy to Heroku
+    - name: Deploy to Heroku
+      env:
+        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+      run: |
+        npm install -g heroku
+        heroku git:remote -a your-heroku-app-name
+        git push https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/your-heroku-app-name.git HEAD:main
